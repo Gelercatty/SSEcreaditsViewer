@@ -12,6 +12,8 @@ pip install Flask werkzeug
 
 pip install beautifulsoup4
 
+pip install xml
+
 python view.py
 ```
 即可在本地端口使用可视化程序
