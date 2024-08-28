@@ -23,3 +23,6 @@ python view.py
 
 【腾讯文档】SSE21级学分核验小工具使用指南
 https://docs.qq.com/doc/DQ2ZVQ0JwWkdRZ2RW
+
+# 致谢
+感谢@MoeFiled的部署
