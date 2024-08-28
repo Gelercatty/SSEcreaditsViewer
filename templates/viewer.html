@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.3.3/echarts.min.js"></script>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Student Grade Summary</title>
+</head>
+
+<body>
+
+    <h1>Grade Summary for {{ personal_info['姓名'] }}</h1>
+    <h2>Personal Information</h2>
+    <ul>
+        {% for key, value in personal_info.items() %}
+        <li><strong>{{ key }}:</strong> {{ value }}</li>
+        {% endfor %}
+    </ul>
+    <div id="main" style="width: 900px;height:400px;"></div>
+    <h1>统计信息</h1>
+    <ul>
+        <li><strong>必修学分：</strong> {{data.got_needed}} </li>
+        <li><strong>选修学分 / 要求学分：</strong> {{data.got_optional}} / {{target_optional}}</li>
+        <li><strong>公选课学分 / 要求学分：</strong> {{data.got_public+data.got_public_online}} / 13</li>
+        <li><strong>线上公选，最多9分：</strong> {{data.got_public_online}} / 9</li>
+        <li><strong>线下公选：</strong> {{data.got_public}}</li>
+    </ul>
+    <!-- 把选修课程列出来. 先列线下的，再列线上的 ，名称，学分-->
+    <h2>公选课程</h2>
+    <h3>线下公选</h3> 
+    <ul>
+        {% for course in public_detail %}
+            <li>{{ course.name }}: {{ course.credits }} credits</li>
+        {% endfor %}
+    </ul>
+   <h3>线上公选</h3> 
+    <ul>
+        {% for course in public_online_detail %}
+            <li>{{ course.name }}: {{ course.credits }} credits</li>
+        {% endfor %}
+    </ul>
+    <h2>Grade Details</h2>
+    <ul>
+        {% for key, value in data.items() %}
+        <li><strong>{{ key.replace('_', ' ').title() }}:</strong> {{ value }}</li>
+        {% endfor %}
+    </ul>
+</body>
+
+</html>
+<script>
+    window.addEventListener("beforeunload", function (event) {
+    var data = new FormData();
+    data.append('filepath', '{{ file_path }}');
+    navigator.sendBeacon('/cleanup', data);
+    });
+    var myChart = echarts.init(document.getElementById('main'));
+
+    // var option = {
+    //     title: {
+    //         text: '学分统计'
+    //     },
+    //     tooltip: {},
+    //     legend: {
+    //         data:['学分']
+    //     },
+    //     xAxis: {
+    //         data: ["必修课", "选修课", "公选课", "在线公选课"]
+    //     },
+    //     yAxis: {},
+    //     series: [{
+    //         name: '学分',
+    //         type: 'bar',
+    //         data: [{{ data.got_needed }}, {{ data.got_optional }}, {{ data.got_public }}, {{ data.got_public_online }}]
+    //     }]
+    // };
+    // option = {
+    //     title: {
+    //         text: '学分组成',
+    //         subtext: '{{personal_info['专业']}}',
+    //         left: 'center'
+    //     },
+    //     tooltip: {
+    //         trigger: 'item'
+    //     },
+    //     legend: {
+    //         orient: 'vertical',
+    //         left: 'left'
+    //     },
+    //     series: [
+    //         {
+    //             name: 'Access From',
+    //             type: 'pie',
+    //             radius: '50%',
+    //             data: [
+    //                 { value: {{data.got_needed}}, name: '必修课程' },
+    //                 { value: {{data.got_optional}}, name: '专业选修课程，共需要{{target_optional}}分' },
+    //                 { value: {{data.got_public}}, name: '公选' },
+    //                 { value: {{data.got_public_online}}, name: '公选（在线），不超过9分' }
+    //             ],
+    //             emphasis: {
+    //                 itemStyle: {
+    //                     shadowBlur: 10,
+    //                     shadowOffsetX: 0,
+    //                     shadowColor: 'rgba(0, 0, 0, 0.5)'
+    //                 }
+    //             }
+    //         }
+    //     ]
+    // };
+
+
+    option = {
+        title: {
+            text: '学分组成',
+            subtext: '总学分{{data.got_needed+data.got_optional+data.got_public+data.got_public_online}}',
+            left: 'center'
+        },
+        tooltip: {
+            trigger: 'item',
+            formatter: '{a} <br/>{b} : {c} ({d}%)'
+        },
+        legend: {
+            orient: 'vertical',
+            left: 'left'
+        },
+        series: [
+            {
+                name: '学分',
+                type: 'pie',
+                radius: ['50%', '70%'], // 设置饼图为环形图
+                label: {
+                    show: false, // 不显示标签
+                    position: 'center'
+                },
+                emphasis: {
+                    label: {
+                        show: true,
+                        fontSize: '30',
+                        fontWeight: 'bold'
+                    }
+                },
+                data: [
+                    { value: {{data.got_needed}}, name: '必修课程' },
+                    { value: {{data.got_optional}}, name: '专业选修课程，共需要{{target_optional}}分' },
+                    { value: {{data.got_public}}, name: '公选课程（线下）' },
+                    { value: {{data.got_public_online}}, name: '公选课程（线上）' }
+                ],
+                emphasis: {
+                    itemStyle: {
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                }
+            }
+        ]
+    };
+
+
+
+    myChart.setOption(option);
+</script>
